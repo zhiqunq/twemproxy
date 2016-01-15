@@ -88,6 +88,8 @@ redis_arg0(struct msg *r)
     case MSG_REQ_REDIS_SPOP:
 
     case MSG_REQ_REDIS_ZCARD:
+    case MSG_REQ_REDIS_HCLEAR:
+    case MSG_REQ_REDIS_QCLEAR:
     case MSG_REQ_REDIS_PFCOUNT:
     case MSG_REQ_REDIS_AUTH:
         return true;
@@ -133,6 +135,8 @@ redis_arg1(struct msg *r)
     case MSG_REQ_REDIS_ZRANK:
     case MSG_REQ_REDIS_ZREVRANK:
     case MSG_REQ_REDIS_ZSCORE:
+    case MSG_REQ_REDIS_QTRIMBACK:
+    case MSG_REQ_REDIS_QTRIMFRONT:
         return true;
 
     default:
@@ -873,6 +877,16 @@ redis_parse_req(struct msg *r)
                     break;
                 }
 
+                if (str6icmp(m, 'h', 'c', 'l', 'e', 'a', 'r')) {
+                    r->type = MSG_REQ_REDIS_HCLEAR;
+                    break;
+                }
+
+                if (str6icmp(m, 'q', 'c', 'l', 'e', 'a', 'r')) {
+                    r->type = MSG_REQ_REDIS_QCLEAR;
+                    break;
+                }
+
                 break;
 
             case 7:
@@ -1000,6 +1014,11 @@ redis_parse_req(struct msg *r)
                     break;
                 }
 
+                if (str10icmp(m, 'q', 't', 'r', 'i', 'm', '_', 'b', 'a', 'c', 'k')) {
+                    r->type = MSG_REQ_REDIS_QTRIMBACK;
+                    break;
+                }
+
             case 11:
                 if (str11icmp(m, 'i', 'n', 'c', 'r', 'b', 'y', 'f', 'l', 'o', 'a', 't')) {
                     r->type = MSG_REQ_REDIS_INCRBYFLOAT;
@@ -1033,6 +1052,11 @@ redis_parse_req(struct msg *r)
 
                 if (str11icmp(m, 'z', 'r', 'a', 'n', 'g', 'e', 'b', 'y', 'l', 'e', 'x')) {
                     r->type = MSG_REQ_REDIS_ZRANGEBYLEX;
+                    break;
+                }
+
+                if (str11icmp(m, 'q', 't', 'r', 'i', 'm', '_', 'f', 'r', 'o', 'n', 't')) {
+                    r->type = MSG_REQ_REDIS_QTRIMFRONT;
                     break;
                 }
 
